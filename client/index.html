@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Каталог библиотеки</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%238f3d2b'/%3E%3Cpath d='M9 7h10a4 4 0 0 1 4 4v14H13a4 4 0 0 0-4 4V7z' fill='%23f8efe6'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,600;7..72,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-block">
+        <a class="brand" id="brand" href="#/">Каталог библиотеки</a>
+        <p class="brand-note">Учёт фонда: карточки и обложки</p>
+      </div>
+      <button class="button" id="add-btn" type="button">Добавить книгу</button>
+    </div>
+  </header>
+
+  <div id="banner" class="banner" hidden role="status"></div>
+
+  <main>
+    <section id="view-list">
+      <form id="filters" class="filters" autocomplete="off">
+        <label>
+          <span class="label">Поиск</span>
+          <input id="search" type="search" placeholder="Название или автор" autocomplete="off">
+        </label>
+        <label>
+          <span class="label">Жанр</span>
+          <select id="genre-filter">
+            <option value="">Все жанры</option>
+          </select>
+        </label>
+      </form>
+      <p id="list-status" class="muted">Загрузка…</p>
+      <div id="book-list" class="cards"></div>
+    </section>
+
+    <section id="view-form" hidden>
+      <form id="book-form" class="panel" novalidate>
+        <h1 id="form-title">Новая книга</h1>
+        <p class="hint">Карточка сохраняется запросом JSON. Файл обложки уходит отдельно как multipart/form-data. Страница при этом не перезагружается.</p>
+
+        <label>
+          <span class="label">Название</span>
+          <input id="field-title" name="title" type="text" maxlength="200" required aria-describedby="error-title">
+          <p id="error-title" class="field-error" data-error-for="title"></p>
+        </label>
+
+        <label>
+          <span class="label">Автор</span>
+          <input id="field-author" name="author" type="text" maxlength="200" required aria-describedby="error-author">
+          <p id="error-author" class="field-error" data-error-for="author"></p>
+        </label>
+
+        <div class="form-row">
+          <label>
+            <span class="label">Год издания</span>
+            <input id="field-year" name="year" type="number" step="1" required aria-describedby="error-year">
+            <p id="error-year" class="field-error" data-error-for="year"></p>
+          </label>
+          <label>
+            <span class="label">Жанр</span>
+            <select id="field-genre" name="genre" required aria-describedby="error-genre">
+              <option value="">Выберите жанр</option>
+            </select>
+            <p id="error-genre" class="field-error" data-error-for="genre"></p>
+          </label>
+        </div>
+
+        <label>
+          <span class="label">Описание</span>
+          <textarea id="field-description" name="description" maxlength="4000" aria-describedby="error-description"></textarea>
+          <p id="error-description" class="field-error" data-error-for="description"></p>
+        </label>
+
+        <label>
+          <span class="label">Обложка</span>
+          <input id="field-cover" name="cover" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-describedby="error-cover">
+          <p class="hint">JPEG, PNG, WEBP или GIF, до 5 МБ.</p>
+          <p id="error-cover" class="field-error" data-error-for="cover"></p>
+        </label>
+
+        <img id="cover-preview" class="cover-preview" alt="Предпросмотр обложки" hidden>
+
+        <label class="check" id="remove-cover-wrap" hidden>
+          <input id="field-remove-cover" type="checkbox">
+          Удалить текущую обложку
+        </label>
+
+        <div class="actions">
+          <button class="button secondary" id="form-cancel" type="button">Отмена</button>
+          <button class="button" id="form-submit" type="submit">Добавить</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="view-detail" hidden>
+      <article id="detail"></article>
+    </section>
+
+    <section id="view-missing" hidden>
+      <div class="empty-state panel">
+        <h1 id="missing-title">Страница не найдена</h1>
+        <p id="missing-text"></p>
+        <div class="actions">
+          <button class="button" id="retry" type="button" hidden>Повторить</button>
+          <a class="button secondary" href="#/">К каталогу</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">Лабораторная работа №2 · SPA и REST API · Node.js</footer>
+
+  <dialog id="confirm-dialog">
+    <form method="dialog">
+      <h2>Удаление</h2>
+      <p id="confirm-text"></p>
+      <div class="dialog-actions">
+        <button class="button secondary" value="cancel">Отмена</button>
+        <button class="button danger" value="confirm">Удалить</button>
+      </div>
+    </form>
+  </dialog>
+
+  <noscript>
+    <p class="banner error">Для работы каталога нужен JavaScript.</p>
+  </noscript>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
